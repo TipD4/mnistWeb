@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>TensorFlow.js Image Classification Example</title>
+  <!-- 加载 TensorFlow.js 库 -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.7.0/dist/tf.min.js"></script>
+  <!-- 加载模型 -->
+  <script src="model.js"></script>
+  <style>
+    #input-image, #output-image {
+      max-width: 100%;
+      max-height: 400px;
+    }
+  </style>
+</head>
+<body>
+  <h1>TensorFlow.js Image Classification Example</h1>
+  <h2>输入图像</h2>
+  <input type="file" accept="image/*" onchange="previewImage()" id="file-input">
+  <br>
+  <img src="" id="input-image">
+  <h2>输出图像</h2>
+  <img src="" id="output-image">
+  <script>
+    // 预览图像
+    function previewImage() {
+      var reader = new FileReader();
+      reader.onload = function(event) {
+        var img = document.getElementById('input-image');
+        img.src = event.target.result;
+        runModel(img);
+      }
+      reader.readAsDataURL(document.getElementById('file-input').files[0]);
+    }
+
+    // 加载模型并运行
+    async function runModel(inputImg) {
+      // 加载模型
+      const model = await tf.loadGraphModel('model.json');
+
+      // 处理输入图像
+      const input = tf.browser.fromPixels(inputImg).expandDims(0);
+
+      // 运行模型
+      const output = model.execute(input);
+
+      // 处理输出图像
+      const outputImg = await tf.browser.toPixels(output.squeeze(), document.getElementById('output-image'));
+
+      // 显示输出图像
+      document.getElementById('output-image').src = outputImg.src;
+    }
+  </script>
+</body>
+</html>
